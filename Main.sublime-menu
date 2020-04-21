@@ -1,0 +1,26 @@
+[
+    {
+        "caption": "Preferences",
+        "id": "preferences",
+        "children": [
+            {
+                "caption": "Package Settings",
+                "id": "package-settings",
+                "children": [
+                    {
+                        "caption": "Tenki",
+                        "children": [
+                            {
+                                "command": "open_file",
+                                "args": {
+                                    "file": "${packages}/Tenki/Tenki.sublime-settings"
+                                },
+                                "caption": "Settings - Default"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -13,7 +13,7 @@ class Tenki(sublime_plugin.EventListener):
         self.display_weather(view)
 
     def update_status(self):
-        self._status = Weather().get_weather()
+        self._status = "今日の天気：" + Weather().get_weather()
 
     def display_weather(self, view):
         if self._status is not None:
@@ -28,7 +28,6 @@ class Tenki(sublime_plugin.EventListener):
 
 
 class Weather:
-
 
     _city = None
 
