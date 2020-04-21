@@ -3,6 +3,9 @@ import sublime_plugin
 import urllib.request
 
 
+TENKI_SETTING_FILE = 'Tenki.sublime-settings'
+
+
 class Tenki(sublime_plugin.EventListener):
     _status = None
 
@@ -13,15 +16,25 @@ class Tenki(sublime_plugin.EventListener):
         self._status = Weather().get_weather()
 
     def display_weather(self, view):
-        if self._status is None:
-            self.update_status()
         if self._status is not None:
             view.set_status('Tenki', self._status)
+            return True
+        elif self._status is None:
+            self.update_status()
+            view.set_status('Tenki', self._status)
+        else:
+            sublime.status_message('Tenki', "nothing here")
+            return False
 
 
-class Weather():
+class Weather:
+
+
+    _city = None
+
     def get_weather(self):
-        with urllib.request.urlopen('http://wttr.in/Zhengzhou?format=3') as f:
+        self._city = sublime.load_settings(TENKI_SETTING_FILE).get('city')
+        with urllib.request.urlopen('http://wttr.in/{}?format=3'.format(self._city)) as f:
             data = f.read().decode('utf-8')
             data = data.strip()
         return data
