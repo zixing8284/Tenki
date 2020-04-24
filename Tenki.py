@@ -9,7 +9,8 @@ TENKI_SETTING_FILE = 'Tenki.sublime-settings'
 class Tenki(sublime_plugin.EventListener):
     _status = None
 
-    def on_activated(self, view):
+    # def on_activated(self, view):
+    def on_activated_async(self, view):
         self.display_weather(view)
 
     def update_status(self):
