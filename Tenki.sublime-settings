@@ -1,3 +1,23 @@
 {
-    "city": "Zhengzhou"
+    // weather location
+    "city": "Zhengzhou",
+    // radio selection
+    // favorite only one is allowed
+    "favorite": {
+        "央广-音乐之声": "http://live.xmcdn.com/live/12/64.m3u8"
+    },
+    "radio_list": [
+        [
+            "央广-经济之声", "http://live.xmcdn.com/live/1066/64.m3u8"
+        ],
+        [
+            "央广-中国之声", "http://live.xmcdn.com/live/1065/64.m3u8"
+        ],
+        [
+            "央广-音乐之声", "http://live.xmcdn.com/live/12/64.m3u8"
+        ],
+        [
+            "央广-华夏之声", "http://live.xmcdn.com/live/16/64.m3u8"
+        ]
+    ]
 }

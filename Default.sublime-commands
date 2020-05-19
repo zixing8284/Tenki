@@ -1,0 +1,14 @@
+[
+    {
+        "caption": "Tenki: Listen My favorite Radio",
+        "command": "listen"
+    },
+    {
+        "caption": "Tenki: Stop",
+        "command": "stop"
+    },
+    {
+        "caption": "Tenki: Open My Radio",
+        "command": "open_my_radio"
+    }
+]
