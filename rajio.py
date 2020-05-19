@@ -19,8 +19,7 @@ class OpenMyRadio(sublime_plugin.WindowCommand):
     RADIO_LIST = None
 
     def run(self):
-        global v
-        global sign
+        global v, sign
         if not popo and not sign:
             sign = True
             v = self.window.new_file()
@@ -49,10 +48,10 @@ class OpenMyRadio(sublime_plugin.WindowCommand):
 class Listen(sublime_plugin.WindowCommand):
 
     def run(self):
-        global popo
-        global v
+        global popo, v, sign
         if not popo:
             if not sign:
+                sign = True
                 v = self.window.new_file()
                 self.window.focus_view(v)
                 global leave
@@ -101,8 +100,7 @@ class Quit(sublime_plugin.EventListener):
             print(leave)
             print(view.id())
             Stop(sublime_plugin.WindowCommand).run()
-            global v
-            global sign
+            global v, sign
             v = None
             sign = None
             print(popo)
