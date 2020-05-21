@@ -4,32 +4,37 @@ import sublime_plugin
 import subprocess
 
 
-# turn on/off radio
-popo = None
-# if quit radio
-leave = None
-# if new tab
-v = None
-# if start OpenMyRadio
-sign = None
+## todo on_done() 判断正在当前调频时选中当前调频提示输出：正在播放此调频
+## todo on_done() 切换调频时播放调频，提示输出
+## todo ListenCommand() 正在播放当前时，提示输出：正在播放此调频，从其他调频切换时播放调频，提示输出：正在播放最喜欢的调频
 
 
-class OpenMyRadio(sublime_plugin.WindowCommand):
+class Switching:
+    # turn on/off radio
+    popo = None
+    # if newtab exists
+    leave = None
+    # if close tab
+    v = None
+    # if init newtab
+    sign = None
+
+
+class OpenMyRadioCommand(sublime_plugin.WindowCommand):
     TENKI_SETTING_FILE = 'Tenki.sublime-settings'
     RADIO_LIST = None
 
     def run(self):
-        global v, sign
-        if not popo and not sign:
-            sign = True
-            v = self.window.new_file()
-            self.window.focus_view(v)
-            global leave
-            leave = v.id()
-            v.set_scratch(True)
-            v.set_name("Sublime Radio")
-            v.run_command('insert', {'characters': '不要关闭此页面，然后打开一个调频'})
-            v.set_read_only(True)
+        if not Switching.popo and not Switching.sign:
+            Switching.sign = True
+            Switching.v = self.window.new_file()
+            self.window.focus_view(Switching.v)
+            Switching.leave = Switching.v.id()
+            Switching.v.set_scratch(True)
+            Switching.v.set_name("Sublime Radio")
+            Switching.v.run_command(
+                'insert', {'characters': '不要关闭此页面，然后打开一个调频'})
+            Switching.v.set_read_only(True)
 
         self.RADIO_LIST = sublime.load_settings(
             self.TENKI_SETTING_FILE).get('radio_list')
@@ -42,28 +47,28 @@ class OpenMyRadio(sublime_plugin.WindowCommand):
     def on_done(self, index):
         if index == -1:
             return
-        Listen(sublime_plugin.WindowCommand).run()
+        # ListenCommand(sublime_plugin.WindowCommand).run()
+        self.window.run_command('listen')
 
 
-class Listen(sublime_plugin.WindowCommand):
+class ListenCommand(sublime_plugin.WindowCommand):
 
     def run(self):
-        global popo, v, sign
-        if not popo:
-            if not sign:
-                sign = True
-                v = self.window.new_file()
-                self.window.focus_view(v)
-                global leave
-                leave = v.id()
+        if not Switching.popo:
+            if not Switching.sign:
+                Switching.sign = True
+                Switching.v = self.window.new_file()
+                self.window.focus_view(Switching.v)
+                Switching.leave = Switching.v.id()
                 # we dont need to save
-                v.set_scratch(True)
-                v.set_name("Sublime Radio")
-                v.run_command('insert', {'characters': '不要关闭此页面，你最喜欢的调频播放中'})
-                # it cant be edited
-                v.set_read_only(True)
+                Switching.v.set_scratch(True)
+                Switching.v.set_name("Sublime Radio")
+                Switching.v.run_command(
+                    'insert', {'characters': '不要关闭此页面，你最喜欢的调频播放中'})
+                # it should not be editable
+                Switching.v.set_read_only(True)
             try:
-                popo = subprocess.Popen(
+                Switching.popo = subprocess.Popen(
                     "ffplay -loglevel quiet \
                     -nodisp http://live.xmcdn.com/live/1065/64.m3u8")
                 # Do not display CMD window
@@ -76,33 +81,27 @@ class Listen(sublime_plugin.WindowCommand):
                 #       stderr=subprocess.PIPE,startupinfo=st)
             except Exception:
                 print("something wrong here")
-        elif leave:
-            v.set_read_only(False)
-            v.run_command('insert', {'characters': '\n已经打开一个调频'})
-            v.set_read_only(True)
+        elif Switching.leave:
+            Switching.v.set_read_only(False)
+            Switching.v.run_command('insert', {'characters': '\n已经打开一个调频'})
+            Switching.v.set_read_only(True)
             print("已经打开一个调频")
 
 
-class Stop(sublime_plugin.WindowCommand):
+class StopCommand(sublime_plugin.WindowCommand):
     def run(self):
-        global popo
-        if popo:
-            popo.terminate()
-            popo = None
-            # v = None
+        if Switching.popo:
+            Switching.popo.terminate()
+            Switching.popo = None
         else:
             pass
 
 
 class Quit(sublime_plugin.EventListener):
     def on_close(self, view):
-        if view.id() == leave:
-            print(leave)
-            print(view.id())
-            Stop(sublime_plugin.WindowCommand).run()
-            global v, sign
-            v = None
-            sign = None
-            print(popo)
+        if view.id() == Switching.leave:
+            StopCommand(sublime_plugin.WindowCommand).run()
+            Switching.v = None
+            Switching.sign = None
         else:
             pass
