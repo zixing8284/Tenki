@@ -28,21 +28,21 @@ TENKI_SETTING_FILE = 'Tenki.sublime-settings'
 #             return False
 
 
-# class Weather:
+# # class Weather:
 
-#     @staticmethod
-#     def get_weather():
-#         _city = sublime.load_settings(TENKI_SETTING_FILE).get('city')
-#         with urllib.request.urlopen('http://wttr.in/{}?format=3'.format(_city)) as f:
-#             data = f.read().decode('utf-8')
-#             data = data.strip()
-#         return data
+# #     @staticmethod
+# #     def get_weather():
+# #         _city = sublime.load_settings(TENKI_SETTING_FILE).get('city')
+# #         with urllib.request.urlopen('http://wttr.in/{}?format=3'.format(_city)) as f:
+# #             data = f.read().decode('utf-8')
+# #             data = data.strip()
+# #         return data
 
 
-# 無駄ね
-class Gannbare(sublime_plugin.EventListener):
-    def on_activated(self, view):
-        sublime.status_message("make today a happy day !")
+# # 無駄ね
+# class Gannbare(sublime_plugin.EventListener):
+#     def on_activated(self, view):
+#         sublime.status_message("make today a happy day !")
 
 
 

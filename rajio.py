@@ -1,107 +1,80 @@
-
 import sublime
 import sublime_plugin
 import subprocess
 
-
-## todo on_done() 判断正在当前调频时选中当前调频提示输出：正在播放此调频
-## todo on_done() 切换调频时播放调频，提示输出
-## todo ListenCommand() 正在播放当前时，提示输出：正在播放此调频，从其他调频切换时播放调频，提示输出：正在播放最喜欢的调频
+TENKI_SETTING_FILE = 'Tenki.sublime-settings'
 
 
-class Switching:
-    # turn on/off radio
-    popo = None
-    # if newtab exists
-    leave = None
-    # if close tab
-    v = None
-    # if init newtab
-    sign = None
+class Switching(sublime_plugin.EventListener):
+    nigeru = None
+    hitname_go = None
+    hitfm_go = None
+    radio_list = None
 
-
-class OpenMyRadioCommand(sublime_plugin.WindowCommand):
-    TENKI_SETTING_FILE = 'Tenki.sublime-settings'
-    RADIO_LIST = None
-
-    def run(self):
-        if not Switching.popo and not Switching.sign:
-            Switching.sign = True
-            Switching.v = self.window.new_file()
-            self.window.focus_view(Switching.v)
-            Switching.leave = Switching.v.id()
-            Switching.v.set_scratch(True)
-            Switching.v.set_name("Sublime Radio")
-            Switching.v.run_command(
-                'insert', {'characters': '不要关闭此页面，然后打开一个调频'})
-            Switching.v.set_read_only(True)
-
-        self.RADIO_LIST = sublime.load_settings(
-            self.TENKI_SETTING_FILE).get('radio_list')
-        self.window.show_quick_panel(
-            [self.RADIO_LIST[index][0]
-                for index in range(len(self.RADIO_LIST))],
-            self.on_done,
-            sublime.KEEP_OPEN_ON_FOCUS_LOST)
-
-    def on_done(self, index):
-        if index == -1:
-            return
-        # ListenCommand(sublime_plugin.WindowCommand).run()
-        self.window.run_command('listen')
+    def on_activated_async(self, view):
+        my_favorite = sublime.load_settings(
+            TENKI_SETTING_FILE).get('favorite')
+        Switching.hitname_go = tuple(my_favorite)[0]
+        Switching.hitfm_go = tuple(my_favorite.values())[0]
+        Switching.radio_list = sublime.load_settings(
+            TENKI_SETTING_FILE).get('radio_list')
 
 
 class ListenCommand(sublime_plugin.WindowCommand):
+    init = False
+    v = None
+    popo = None
+
+    def init_new_file(self):
+        return self.window.new_file()
+
+    def turn_on(self, url):
+        self.popo = subprocess.Popen(
+            "ffplay -loglevel quiet \
+            -nodisp " + url)
+
+    def turn_off(self):
+        self.popo.terminate()
+
+    def run(self, hitfm=None, hitname=None, selfie=True, inital=True):
+        if not self.init:
+            self.v = self.init_new_file()
+            self.window.focus_view(self.v)
+            # 页面被关闭时记得重置它
+            self.init = True
+            Switching.nigeru = self.v.id()
+            # new tab name
+            self.v.set_name("ST网络广播")
+            # no need store new tab
+            self.v.set_scratch(True)
+
+        if selfie:
+            hitfm = Switching.hitfm_go
+            print(Switching.hitfm_go)
+            print(hitfm)
+            hitname = Switching.hitname_go
+        try:
+            self.turn_on(hitfm)
+        except Exception as e:
+            print(e)
+            print("something wrong here")
+
+
+class OpenMyRadioCommand(sublime_plugin.WindowCommand):
 
     def run(self):
-        if not Switching.popo:
-            if not Switching.sign:
-                Switching.sign = True
-                Switching.v = self.window.new_file()
-                self.window.focus_view(Switching.v)
-                Switching.leave = Switching.v.id()
-                # we dont need to save
-                Switching.v.set_scratch(True)
-                Switching.v.set_name("Sublime Radio")
-                Switching.v.run_command(
-                    'insert', {'characters': '不要关闭此页面，你最喜欢的调频播放中'})
-                # it should not be editable
-                Switching.v.set_read_only(True)
-            try:
-                Switching.popo = subprocess.Popen(
-                    "ffplay -loglevel quiet \
-                    -nodisp http://live.xmcdn.com/live/1065/64.m3u8")
-                # Do not display CMD window
-                # st = subprocess.STARTUPINFO
-                # st.dwFlags = subprocess.STARTF_USESHOWWINDOW
-                # st.wShowWindow = subprocess.SW_HIDE
-                # popo = subprocess.Popen("ffplay -loglevel quiet -nodisp \
-                #       http://live.xmcdn.com/live/12/64.m3u8", \
-                #       stdin=subprocess.PIPE,stdout=subprocess.PIPE, \
-                #       stderr=subprocess.PIPE,startupinfo=st)
-            except Exception:
-                print("something wrong here")
-        elif Switching.leave:
-            Switching.v.set_read_only(False)
-            Switching.v.run_command('insert', {'characters': '\n已经打开一个调频'})
-            Switching.v.set_read_only(True)
-            print("已经打开一个调频")
+        pass
 
 
 class StopCommand(sublime_plugin.WindowCommand):
     def run(self):
-        if Switching.popo:
-            Switching.popo.terminate()
-            Switching.popo = None
-        else:
-            pass
+        pass
 
 
 class Quit(sublime_plugin.EventListener):
     def on_close(self, view):
-        if view.id() == Switching.leave:
+        if view.id() == Switching.nigeru:
             StopCommand(sublime_plugin.WindowCommand).run()
-            Switching.v = None
-            Switching.sign = None
+            ListenCommand.init = False
         else:
             pass
