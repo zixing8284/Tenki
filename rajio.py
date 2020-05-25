@@ -3,8 +3,6 @@ import sublime_plugin
 import subprocess
 
 
-# todo: add statusbar text:(playing what)
-
 TENKI_SETTING_FILE = 'Tenki.sublime-settings'
 
 
@@ -14,6 +12,7 @@ class Switching(sublime_plugin.EventListener):
     hitfm_go = None
     radio_list = None
     popo = None
+    status = None
 
     def on_activated_async(self, view):
         my_favorite = sublime.load_settings(
@@ -24,6 +23,16 @@ class Switching(sublime_plugin.EventListener):
             TENKI_SETTING_FILE).get('radio_list')
         Switching.radio_list = sublime.load_settings(
             TENKI_SETTING_FILE).get('radio_list')
+        self.show_listening(view)
+
+    def show_listening(self, view):
+        if Switching.popo:
+            # view.set_status('Tenki', 'Now Playing: ' + ListenCommand.urlname)
+            Switching.data = 'Now Playing: {}'.format(ListenCommand.urlname)
+        else:
+            # view.set_status('Tenki', 'NO Playing')
+            Switching.data = 'No Playing'
+        return Switching.data
 
 
 class ListenCommand(sublime_plugin.WindowCommand):
@@ -31,22 +40,25 @@ class ListenCommand(sublime_plugin.WindowCommand):
     v = None
     popo = None
     url = None
+    urlname = None
 
     def init_new_file(self):
         return self.window.new_file()
 
     def turn_on(self, url, urlname):
-        # Do not display CMD window
-        # st = subprocess.STARTUPINFO
-        # st.dwFlags = subprocess.STARTF_USESHOWWINDOW
-        # st.wShowWindow = subprocess.SW_HIDE
-        # popo = subprocess.Popen("ffplay -loglevel quiet -nodisp \
-        #       http://live.xmcdn.com/live/12/64.m3u8", \
-        #       stdin=subprocess.PIPE,stdout=subprocess.PIPE, \
-        #       stderr=subprocess.PIPE,startupinfo=st)
+        # DO NOT show CMD window
+        st = subprocess.STARTUPINFO
+        st.dwFlags = subprocess.STARTF_USESHOWWINDOW
+        st.wShowWindow = subprocess.SW_HIDE
         self.popo = Switching.popo = subprocess.Popen(
-            "ffplay -loglevel quiet \
-            -nodisp " + url)
+            "ffplay -loglevel quiet -nodisp " + url,
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, startupinfo=st)
+
+        # show CMD window default
+        # self.popo = Switching.popo = subprocess.Popen(
+        #     "ffplay -loglevel quiet \
+        #     -nodisp " + url)
         self.v.set_read_only(False)
         self.v.run_command(
             'insert',
@@ -92,6 +104,7 @@ class ListenCommand(sublime_plugin.WindowCommand):
             hitfm = Switching.hitfm_go
             hitname = Switching.hitname_go
         try:
+            ListenCommand.urlname = hitname
             self.turn_off(hitfm, hitname)
             # self.url = hitfm
             ListenCommand.url = hitfm
@@ -132,6 +145,7 @@ class StopCommand(sublime_plugin.WindowCommand):
                 {'characters': '停止了播放\n'})
             ListenCommand.v.set_read_only(True)
             Switching.popo = None
+            # ListenCommand.url = None
         pass
 
 

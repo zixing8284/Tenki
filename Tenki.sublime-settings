@@ -1,11 +1,14 @@
 {
     // weather location
     "city": "Zhengzhou",
+    // show current time
+    "time": true,
     // radio selection
-    // favorite only one is allowed
+    // favorite only one please
     "favorite": {
         "央广-音乐之声": "http://live.xmcdn.com/live/12/64.m3u8"
     },
+    // other fm list
     "radio_list": [
         [
             "央广-经济之声", "http://live.xmcdn.com/live/1066/64.m3u8"
