@@ -44,6 +44,8 @@ class Tenki(sublime_plugin.EventListener):
         else:
             sublime.status_message('Tenki', "nothing here")
             # return False
+        # sublime.set_timeout(
+        #     lambda: self.display_weather(view), 1000)
         sublime.set_timeout_async(
             lambda: self.display_weather(view), 1000)
 

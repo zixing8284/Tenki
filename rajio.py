@@ -1,7 +1,7 @@
 import sublime
 import sublime_plugin
 import subprocess
-
+import platform
 
 TENKI_SETTING_FILE = 'Tenki.sublime-settings'
 
@@ -46,19 +46,29 @@ class ListenCommand(sublime_plugin.WindowCommand):
         return self.window.new_file()
 
     def turn_on(self, url, urlname):
-        # DO NOT show CMD window
-        st = subprocess.STARTUPINFO
-        st.dwFlags = subprocess.STARTF_USESHOWWINDOW
-        st.wShowWindow = subprocess.SW_HIDE
-        self.popo = Switching.popo = subprocess.Popen(
-            "ffplay -loglevel quiet -nodisp " + url,
-            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, startupinfo=st)
+        if platform.system() == 'Windows':
+            # DO NOT show CMD window
+            # The STARTUPINFO class and following constants are only available on Windows.
+            st = subprocess.STARTUPINFO
+            st.dwFlags = subprocess.STARTF_USESHOWWINDOW
+            st.wShowWindow = subprocess.SW_HIDE
+            # self.popo = Switching.popo = subprocess.Popen(
+            #     "ffplay -loglevel quiet -nodisp " + url,
+            #     stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            #     stderr=subprocess.PIPE, startupinfo=st)
+            self.popo = Switching.popo = subprocess.Popen(
+                "ffplay -loglevel quiet -nodisp " + url, startupinfo=st)
 
-        # show CMD window default
-        # self.popo = Switching.popo = subprocess.Popen(
-        #     "ffplay -loglevel quiet \
-        #     -nodisp " + url)
+            # # show CMD window default
+            # self.popo = Switching.popo = subprocess.Popen(
+            #     "ffplay -loglevel quiet \
+            #     -nodisp " + url)
+
+        # Linux
+        else:
+            self.popo = Switching.popo = subprocess.Popen(
+                ['ffplay', '-loglevel', 'quiet', '-nodisp', str(url)])
+
         self.v.set_read_only(False)
         self.v.run_command(
             'insert',
@@ -98,7 +108,6 @@ class ListenCommand(sublime_plugin.WindowCommand):
             self.v.run_command(
                 'insert',
                 {'characters': '不要关闭此页面，然后打开一个调频\n'})
-            self.v.set_read_only(True)
         # if select Listen My favorite radio
         if selfie:
             hitfm = Switching.hitfm_go
@@ -111,7 +120,11 @@ class ListenCommand(sublime_plugin.WindowCommand):
         except Exception as e:
             print(e)
             print("error here")
+            self.v.run_command(
+                'insert',
+                {'characters': 'something\'s wrong\n'})
             pass
+        self.v.set_read_only(True)
 
 
 class OpenMyRadioCommand(sublime_plugin.WindowCommand):
