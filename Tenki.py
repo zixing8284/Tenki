@@ -5,7 +5,8 @@ from datetime import datetime
 from .rajio import Switching
 
 # todo: clickable? in the status bar
-# todo: display selectable in status bar **args
+# todo: stream_title(?) display
+# todo: add shortcuts
 
 TENKI_SETTING_FILE = 'Tenki.sublime-settings'
 
@@ -19,7 +20,7 @@ radio = settings.get('radio', True)
 
 # array_list = [x for x in [time, tenki, radio] if x and True]
 array_list = [time, tenki, radio]
-print(array_list)
+# print(array_list)
 
 
 class Time:
@@ -30,7 +31,6 @@ class Time:
         if _time:
             show_time = datetime.now().strftime("%H:%M:%S")
         else:
-            # time = ""
             show_time = ""
         return show_time
 
@@ -72,21 +72,14 @@ class Tenki(sublime_plugin.EventListener):
 
         if any(array_list):
             if self._status is not None:
-                # view.set_status('Tenki', "{}{},{}".format(
-                #     Time.get_time(), self._status, Switching.data))
                 view.set_status('Tenki', self.get_status())
                 # return True
             elif self._status is None:
                 self.update_status()
-                # view.set_status('Tenki', array_list)
-                # view.set_status('Tenki', "{}{},{}".format(
-                #     Time.get_time(), self._status, Switching.data))
                 view.set_status('Tenki', self.get_status())
             else:
                 sublime.status_message('Tenki', "nothing here")
                 # return False
-            # sublime.set_timeout(
-            #     lambda: self.display_weather(view), 1000)
             if time is not False:
                 sublime.set_timeout_async(
                     lambda: self.display_weather(view), 1000)
