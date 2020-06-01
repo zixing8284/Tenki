@@ -10,18 +10,6 @@ from .rajio import Switching
 
 TENKI_SETTING_FILE = 'Tenki.sublime-settings'
 
-settings = sublime.load_settings(TENKI_SETTING_FILE)
-
-time = settings.get('time', True)
-
-tenki = settings.get('tenki', True)
-
-radio = settings.get('radio', True)
-
-# array_list = [x for x in [time, tenki, radio] if x and True]
-array_list = [time, tenki, radio]
-# print(array_list)
-
 
 class Time:
 
@@ -49,9 +37,11 @@ class Weather:
 
 
 class Tenki(sublime_plugin.EventListener):
-    _status = None
 
-    def get_status(self):
+    _status = None
+    _activated = False
+
+    def get_status(self, array_list):
         new_array = [Time.get_time(), self._status, Switching.data]
         bad_array = []
         for index, item in enumerate(array_list):
@@ -70,17 +60,26 @@ class Tenki(sublime_plugin.EventListener):
 
     def display_weather(self, view):
 
-        if any(array_list):
+        if not self._activated:
+            settings = sublime.load_settings(TENKI_SETTING_FILE)
+            self.time = settings.get('time', True)
+            tenki = settings.get('tenki', True)
+            radio = settings.get('radio', True)
+            # array_list = [x for x in [time, tenki, radio] if x and True]
+            self.array_list = [self.time, tenki, radio]
+            # print(array_list)
+            self._activated = True
+        if any(self.array_list):
             if self._status is not None:
-                view.set_status('Tenki', self.get_status())
+                view.set_status('Tenki', self.get_status(self.array_list))
                 # return True
             elif self._status is None:
                 self.update_status()
-                view.set_status('Tenki', self.get_status())
+                view.set_status('Tenki', self.get_status(self.array_list))
             else:
                 sublime.status_message('Tenki', "nothing here")
                 # return False
-            if time is not False:
+            if self.time is not False:
                 sublime.set_timeout_async(
                     lambda: self.display_weather(view), 1000)
         else:
