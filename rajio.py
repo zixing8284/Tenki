@@ -12,18 +12,22 @@ class Switching(sublime_plugin.EventListener):
     hitfm_go = None
     radio_list = None
     popo = None
-    status = None
+    status = False
 
     def on_activated_async(self, view):
-        my_favorite = sublime.load_settings(
-            TENKI_SETTING_FILE).get('favorite')
-        Switching.hitname_go = tuple(my_favorite)[0]
-        Switching.hitfm_go = tuple(my_favorite.values())[0]
-        Switching.radio_list = sublime.load_settings(
-            TENKI_SETTING_FILE).get('radio_list')
-        Switching.radio_list = sublime.load_settings(
-            TENKI_SETTING_FILE).get('radio_list')
-        self.show_listening(view)
+        if self.status is False:
+            my_favorite = sublime.load_settings(
+                TENKI_SETTING_FILE).get('favorite')
+            Switching.hitname_go = tuple(my_favorite)[0]
+            Switching.hitfm_go = tuple(my_favorite.values())[0]
+            Switching.radio_list = sublime.load_settings(
+                TENKI_SETTING_FILE).get('radio_list')
+            Switching.radio_list = sublime.load_settings(
+                TENKI_SETTING_FILE).get('radio_list')
+            self.show_listening(view)
+            self.status = True
+        else:
+            pass
 
     def show_listening(self, view):
         if Switching.popo:
@@ -48,7 +52,8 @@ class ListenCommand(sublime_plugin.WindowCommand):
     def turn_on(self, url, urlname):
         if platform.system() == 'Windows':
             # DO NOT show CMD window
-            # The STARTUPINFO class and following constants are only available on Windows.
+            # The STARTUPINFO class and following constants are
+            # only available on Windows.
             st = subprocess.STARTUPINFO
             st.dwFlags = subprocess.STARTF_USESHOWWINDOW
             st.wShowWindow = subprocess.SW_HIDE
