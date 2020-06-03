@@ -24,10 +24,10 @@ class Switching(sublime_plugin.EventListener):
                 TENKI_SETTING_FILE).get('radio_list')
             Switching.radio_list = sublime.load_settings(
                 TENKI_SETTING_FILE).get('radio_list')
-            self.show_listening(view)
             self.status = True
         else:
             pass
+        self.show_listening(view)
 
     def show_listening(self, view):
         if Switching.popo:
