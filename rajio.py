@@ -22,8 +22,6 @@ class Switching(sublime_plugin.EventListener):
             Switching.hitfm_go = tuple(my_favorite.values())[0]
             Switching.radio_list = sublime.load_settings(
                 TENKI_SETTING_FILE).get('radio_list')
-            Switching.radio_list = sublime.load_settings(
-                TENKI_SETTING_FILE).get('radio_list')
             self.status = True
         else:
             pass
