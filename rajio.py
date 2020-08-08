@@ -29,15 +29,15 @@ class Switching(sublime_plugin.EventListener):
 
     def show_listening(self, view):
         if Switching.popo:
-            # view.set_status('Tenki', 'Now Playing: ' + ListenCommand.urlname)
-            Switching.data = 'Now Playing: {}'.format(ListenCommand.urlname)
+            # view.set_status('Tenki', 'Now Playing: ' + TenkiListenCommand.urlname)
+            Switching.data = 'Now Playing: {}'.format(TenkiListenCommand.urlname)
         else:
             # view.set_status('Tenki', 'NO Playing')
             Switching.data = 'No Playing'
         return Switching.data
 
 
-class ListenCommand(sublime_plugin.WindowCommand):
+class TenkiListenCommand(sublime_plugin.WindowCommand):
     init = False
     v = None
     popo = None
@@ -84,7 +84,7 @@ class ListenCommand(sublime_plugin.WindowCommand):
         else:
             self.v.set_read_only(False)
             # if self.url != url:
-            if ListenCommand.url != url:
+            if TenkiListenCommand.url != url:
                 self.popo.terminate()
                 self.v.run_command(
                     'insert',
@@ -97,12 +97,12 @@ class ListenCommand(sublime_plugin.WindowCommand):
             self.v.set_read_only(True)
 
     def run(self, hitfm=None, hitname=None, selfie=True, inital=True):
-        # if not ListenCommand.init:
+        # if not TenkiListenCommand.init:
         if not self.init:
-            self.v = ListenCommand.v = self.init_new_file()
+            self.v = TenkiListenCommand.v = self.init_new_file()
             self.window.focus_view(self.v)
             # remember to reset this in QuitCommand
-            ListenCommand.init = True
+            TenkiListenCommand.init = True
             Switching.nigeru = self.v.id()
             # new tab name
             self.v.set_name("ST网络广播")
@@ -116,10 +116,10 @@ class ListenCommand(sublime_plugin.WindowCommand):
             hitfm = Switching.hitfm_go
             hitname = Switching.hitname_go
         try:
-            ListenCommand.urlname = hitname
+            TenkiListenCommand.urlname = hitname
             self.turn_off(hitfm, hitname)
             # self.url = hitfm
-            ListenCommand.url = hitfm
+            TenkiListenCommand.url = hitfm
         except Exception as e:
             print(e)
             print("error here")
@@ -130,7 +130,7 @@ class ListenCommand(sublime_plugin.WindowCommand):
         self.v.set_read_only(True)
 
 
-class OpenMyRadioCommand(sublime_plugin.WindowCommand):
+class TenkiOpenMyRadioCommand(sublime_plugin.WindowCommand):
 
     # def run(self, hitfm=None, hitname=None, selfie=False, inital=True):
     def run(self):
@@ -144,24 +144,24 @@ class OpenMyRadioCommand(sublime_plugin.WindowCommand):
         if index == -1:
             return
         self.window.run_command(
-            'listen',
+            'tenki_listen',
             {'hitfm': Switching.radio_list[index][1],
              'hitname': Switching.radio_list[index][0],
              'selfie': False})
 
 
-class StopCommand(sublime_plugin.WindowCommand):
+class TenkiStopCommand(sublime_plugin.WindowCommand):
 
     def run(self):
         if Switching.popo:
             Switching.popo.terminate()
-            ListenCommand.v.set_read_only(False)
-            ListenCommand.v.run_command(
+            TenkiListenCommand.v.set_read_only(False)
+            TenkiListenCommand.v.run_command(
                 'insert',
                 {'characters': '停止了播放\n'})
-            ListenCommand.v.set_read_only(True)
+            TenkiListenCommand.v.set_read_only(True)
             Switching.popo = None
-            # ListenCommand.url = None
+            # TenkiListenCommand.url = None
         pass
 
 
@@ -169,7 +169,7 @@ class Quit(sublime_plugin.EventListener):
 
     def on_close(self, view):
         if view.id() == Switching.nigeru:
-            StopCommand(sublime_plugin.WindowCommand).run()
-            ListenCommand.init = False
+            TenkiStopCommand(sublime_plugin.WindowCommand).run()
+            TenkiListenCommand.init = False
         else:
             pass
